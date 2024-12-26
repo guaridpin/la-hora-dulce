@@ -2,6 +2,14 @@
     background-color: #2e3593;
 }
 
+.bg-primary {
+  background-color: #2e3593 !important; }
+
+a.bg-primary:hover, a.bg-primary:focus,
+button.bg-primary:hover,
+button.bg-primary:focus {
+  background-color: #2e3593 !important; }
+
 .bg-gradient-primary {
     background: linear-gradient(87deg, #fb745d 100%, #2e3593 100%) !important; }
 
