@@ -3,6 +3,10 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+import json
+from django.http import JsonResponse
+from apps.scraper.utils import scrape_and_save_by_category
+from .models import Receta
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -42,3 +46,22 @@ def pages(request):
     except:
         html_template = loader.get_template('home/page-500.html')
         return HttpResponse(html_template.render(context, request))
+
+
+def scrape_view(request):
+    if request.method == "POST":  # Asegúrate de usar POST para realizar esta acción
+        categories = [
+            "arroz-con-leche",
+            "tartas",
+            "bizcochos",
+            "ensaladas",
+            "sopas"
+        ]
+        # Llamar al método de scraping
+        scrape_and_save_by_category(categories)
+        
+        # Contar cuántas recetas se cargaron
+        count = Receta.objects.count()
+        return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
+    else:
+        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
