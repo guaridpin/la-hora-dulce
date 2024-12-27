@@ -49,7 +49,7 @@ def pages(request):
 
 
 def scrape_view(request):
-    if request.method == "POST":  # Asegúrate de usar POST para realizar esta acción
+    if request.method == "POST":
         categories = [
             "arroz-con-leche",
             "tartas",
@@ -57,11 +57,15 @@ def scrape_view(request):
             "ensaladas",
             "sopas"
         ]
-        # Llamar al método de scraping
         scrape_and_save_by_category(categories)
-        
-        # Contar cuántas recetas se cargaron
         count = Receta.objects.count()
         return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
+    elif request.method == "GET":
+        # Renderiza una página con el botón para iniciar el scraping
+        from django.template import loader
+        context = {}
+        html_template = loader.get_template('recetas/list.html')
+        return HttpResponse(html_template.render(context, request))
     else:
         return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+

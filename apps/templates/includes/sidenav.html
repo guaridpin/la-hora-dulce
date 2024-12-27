@@ -12,7 +12,7 @@
         <!-- Nav items -->
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/">
+            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'scrape' %}">
                 <i class="ni ni-cloud-download-95 text-primary"></i>
               <span class="nav-link-text">Cargar recetas</span>
             </a>

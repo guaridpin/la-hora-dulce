@@ -11751,7 +11751,7 @@ a.btn-icon-only {
     position: relative; }
 
 .footer-auto-bottom {
-  position: absolute;
+  position: relative;
   bottom: 0;
   width: 100%; }
 
