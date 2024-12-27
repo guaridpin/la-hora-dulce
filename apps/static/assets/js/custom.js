@@ -12,14 +12,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Confirmar y ejecutar el scraping
     confirmScrapeButton.addEventListener('click', function () {
-        fetch('/scrape/', {
+        fetch('/scraping/start/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json'
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             resultMessage.textContent = data.success ? data.message : 'Ocurrió un error durante el scraping.';
             resultModal.show();
@@ -28,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             resultMessage.textContent = 'Error de conexión: ' + error.message;
             resultModal.show();
         });
-    });
+    });    
 
     // Función para obtener el CSRF token
     function getCookie(name) {

@@ -7,12 +7,9 @@ from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
-
-    # The home page
     path('', views.index, name='home'),
-    path('scraping/', views.scrape_view, name='scrape'),
-
-    # Matches any html file
+    path('scraping/start/', views.scrape_start, name='scrape_start'),
+    path('scraping/status/', views.scrape_status, name='scrape_status'),
     re_path(r'^.*\.*', views.pages, name='pages'),
-
 ]
+

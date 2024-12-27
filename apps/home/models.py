@@ -12,6 +12,5 @@ class Receta(models.Model):
     image_url = models.URLField(blank=True, null=True)  # URL de la imagen principal
     tags = models.TextField(blank=True, null=True)  # Tags o categorías asociadas
     source_url = models.URLField()  # Enlace a la receta original
-
     def __str__(self):
         return self.title

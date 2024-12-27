@@ -48,24 +48,42 @@ def pages(request):
         return HttpResponse(html_template.render(context, request))
 
 
-def scrape_view(request):
+@login_required(login_url="/login/")
+def scrape_start(request):
     if request.method == "POST":
-        categories = [
-            "arroz-con-leche",
-            "tartas",
-            "bizcochos",
-            "ensaladas",
-            "sopas"
-        ]
-        scrape_and_save_by_category(categories)
-        count = Receta.objects.count()
-        return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
-    elif request.method == "GET":
-        # Renderiza una página con el botón para iniciar el scraping
-        from django.template import loader
+        try:
+            categories = [
+                "arroz-con-leche",
+                "bizcochos",
+                "chocolate",
+                "crepes-y-tortitas",
+                "cupcakes",
+                "desayunos",
+                "flanes",
+                "galletas",
+                "helados-y-sorbetes",
+                "magdalenas-y-muffins",
+                "meriendas",
+                "natillas",
+                "postres",
+                "postres-tradicionales",
+                "tartaletas-y-hojaldres",
+                "tartas"
+            ]
+            scrape_and_save_by_category(categories)
+            count = Receta.objects.count()
+            return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    else:
+        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+
+
+@login_required(login_url="/login/")
+def scrape_status(request):
+    if request.method == "GET":
         context = {}
         html_template = loader.get_template('recetas/list.html')
         return HttpResponse(html_template.render(context, request))
     else:
         return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
-
