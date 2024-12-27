@@ -1,5 +1,7 @@
-from whoosh.index import create_in
+from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID
+from whoosh.qparser import QueryParser
+from apps.home.models import Receta
 import os
 
 def create_index():
@@ -9,13 +11,10 @@ def create_index():
     ix = create_in("index", schema)
     return ix
 
-from whoosh.index import open_dir
-from whoosh.qparser import QueryParser
-
 def index_recipes():
     ix = create_index()
     writer = ix.writer()
-    recipes = Recipe.objects.all()
+    recipes = Receta.objects.all()
     for recipe in recipes:
         writer.add_document(title=recipe.title, link=recipe.link, image=recipe.image)
     writer.commit()
