@@ -59,7 +59,7 @@ def scrape_recipes_by_category(categories):
     return all_recipes
 
 
-def scrape_recipe(url, category):
+def scrape_recipe(url, category_name):
     try:
         response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
@@ -71,7 +71,10 @@ def scrape_recipe(url, category):
 
     # Extraer título
     title_tag = soup.find("h1", class_="underline", itemprop="name")
-    title = title_tag.text.split('\n')[0].strip() if title_tag else "Título desconocido"
+    title = title_tag.text.split('\n')[0].strip() if title_tag else None
+    if not title:
+        print(f"No se encontró un título para la receta en {url}.")
+        return
 
     # Extraer nombre del autor
     author_tag = soup.find(itemprop="author")
@@ -90,6 +93,9 @@ def scrape_recipe(url, category):
 
     # Extraer ingredientes
     ingredients = [li.text.strip() for li in soup.find_all(itemprop="recipeIngredient")]
+    if not ingredients:
+        print(f"No se encontraron ingredientes para la receta: {title}.")
+        return
 
     # Extraer instrucciones
     instructions_container = soup.find(itemprop="recipeInstructions")
@@ -106,11 +112,15 @@ def scrape_recipe(url, category):
         if created:
             print(f"Nuevo autor creado: {author_name}")
 
+    # Crear o buscar la categoría
+    category, created = Category.objects.get_or_create(name=category_name)
+    if created:
+        print(f"Nueva categoría creada: {category_name}")
+
     # Crear o actualizar la receta
-    Recipe.objects.update_or_create(
-        source_url=url,
+    recipe, created = Recipe.objects.update_or_create(
+        title=title,
         defaults={
-            "title": title,
             "author": author,
             "category": category,
             "program": program,
@@ -123,7 +133,8 @@ def scrape_recipe(url, category):
         }
     )
 
-    print(f"Receta guardada/actualizada: {title}")
+    action = "creada" if created else "actualizada"
+    print(f"Receta {action}: {title}")
 
 
 def scrape_and_save_by_category(categories):
