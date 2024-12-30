@@ -2,43 +2,51 @@ import requests
 from bs4 import BeautifulSoup
 from apps.home.models import Receta, Autor, Categoria
 
-# lineas para evitar error SSL
-import os, ssl
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-getattr(ssl, '_create_unverified_context', None)):
+# Líneas para evitar error SSL
+import os
+import ssl
+
+if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
     ssl._create_default_https_context = ssl._create_unverified_context
 
+BASE_URL = "https://canalcocina.es/recetas/?buscar-texto=&categoria="
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
 def scrape_recipes_by_category(categories):
-    
-    #borrar tablas
+    # Borrar tablas
     Receta.objects.all().delete()
     Categoria.objects.all().delete()
     Autor.objects.all().delete()
-    
-    base_url = "https://canalcocina.es/recetas/?buscar-texto=&categoria="
+
     all_recipes = []
 
     for category_name in categories:
-        url = f"{base_url}{category_name}"
+        url = f"{BASE_URL}{category_name}"
         print(f"Procesando categoría: {category_name} - URL: {url}")
-        response = requests.get(url)
-        if response.status_code != 200:
-            print(f"Error al acceder a la categoría: {category_name}, Status Code: {response.status_code}")
+        try:
+            response = requests.get(url, headers=HEADERS)
+            response.raise_for_status()
+            print("Acceso correcto a la categoría")
+        except requests.RequestException as e:
+            print(f"Error al acceder a la categoría {category_name}: {e}")
             continue
 
         soup = BeautifulSoup(response.content, 'lxml')
 
         # Obtener o crear la categoría
-        category, created = Categoria.objects.get_or_create(name=category_name)
+        category, created = Categoria.objects.get_or_create(nombre=category_name)
         if created:
             print(f"Categoría creada: {category_name}")
 
-        recipies = soup.find_all('a', class_='row box-details recipe')
-        
-        for recipe in recipies:
+        recipes = soup.find_all('a', class_='row box-details recipe')
+
+        for recipe in recipes:
             title_tag = recipe.find('span', class_='title')
             title = title_tag.text.strip() if title_tag else "Título no encontrado"
-            
+
             link = recipe['href'] if recipe.has_attr('href') else "#"
             full_link = f"https://canalcocina.es{link}"
 
@@ -53,32 +61,30 @@ def scrape_recipes_by_category(categories):
 
 
 def scrape_recipe(url, category):
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f"Error al acceder a la receta: {url}, Status Code: {response.status_code}")
+    try:
+        response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error al acceder a la receta {url}: {e}")
         return
 
     soup = BeautifulSoup(response.content, 'lxml')
 
     # Extraer título
-    title = soup.find("h1", class_="underline", itemprop="name")
-    if title:
-        title = title.text.split('\n')[0].strip()
-    else:
-        print("No se pudo encontrar el título.")
-        return
+    title_tag = soup.find("h1", class_="underline", itemprop="name")
+    title = title_tag.text.split('\n')[0].strip() if title_tag else "Título desconocido"
 
     # Extraer nombre del autor
-    author_name = soup.find(itemprop="author")
-    author_name = author_name.text.strip() if author_name else None
+    author_tag = soup.find(itemprop="author")
+    author_name = author_tag.text.strip() if author_tag else None
 
     # Extraer programa
-    program = soup.find("a", title=True)
-    program = program.text.strip() if program else None
+    program_tag = soup.find("a", title=True)
+    program = program_tag.text.strip() if program_tag else None
 
     # Extraer tiempo, dificultad y comensales
-    time_info = soup.find("h1", class_="underline").text if soup.find("h1", class_="underline") else ""
-    time_parts = [part.strip() for part in time_info.split('|') if ':' in part]
+    time_info = soup.find("h1", class_="underline")
+    time_parts = [part.strip() for part in time_info.text.split('|') if ':' in part] if time_info else []
     time = next((part.split(':')[1].strip() for part in time_parts if 'Tiempo' in part), None)
     difficulty = next((part.split(':')[1].strip() for part in time_parts if 'Dificultad' in part), None)
     servings = next((part.split(':')[1].strip() for part in time_parts if 'Comensales' in part), None)
@@ -88,18 +94,11 @@ def scrape_recipe(url, category):
     image_url = image_tag['src'] if image_tag else None
 
     # Extraer ingredientes
-    ingredients = [
-        li.text.strip() for li in soup.find_all(itemprop="recipeIngredient")
-    ]
+    ingredients = [li.text.strip() for li in soup.find_all(itemprop="recipeIngredient")]
 
     # Extraer instrucciones
     instructions_container = soup.find(itemprop="recipeInstructions")
-    if instructions_container:
-        instructions = "\n".join([
-            p.text.strip() for p in instructions_container.find_all("p")
-        ])
-    else:
-        instructions = ""
+    instructions = "\n".join([p.text.strip() for p in instructions_container.find_all("p")]) if instructions_container else ""
 
     # Extraer tags
     tags_container = soup.select(".list-grey a")
@@ -117,8 +116,8 @@ def scrape_recipe(url, category):
         source_url=url,
         defaults={
             "title": title,
-            "author": author,  # Asociar el autor
-            "category": category,  # Asociar la categoría
+            "author": author,
+            "category": category,
             "program": program,
             "time": time,
             "difficulty": difficulty,
@@ -137,8 +136,5 @@ def scrape_and_save_by_category(categories):
     print("Inicio del proceso general de scraping y guardado.")
     recipes = scrape_recipes_by_category(categories)
     for recipe_data in recipes:
-        # Procesar cada receta
         scrape_recipe(recipe_data['link'], recipe_data['category'])
     print("Proceso completado.")
-
-

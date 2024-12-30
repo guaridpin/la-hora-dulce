@@ -5,13 +5,13 @@ class Autor(models.Model):
     bio = models.TextField(blank=True, null=True)  # Biografía del autor
 
     def __str__(self):
-        return self.name
+        return self.nombre
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100, unique=True)  # Nombre único de la categoría
 
     def __str__(self):
-        return self.name
+        return self.nombre
 
 class Receta(models.Model):
     title = models.CharField(max_length=255)  # Título de la receta

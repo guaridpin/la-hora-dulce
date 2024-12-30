@@ -52,38 +52,26 @@ def pages(request):
 def scrape_start(request):
     if request.method == "POST":
         try:
-            categories = [
-                "arroz-con-leche",
-                "bizcochos",
-                "chocolate",
-                "crepes-y-tortitas",
-                "cupcakes",
-                "desayunos",
-                "flanes",
-                "galletas",
-                "helados-y-sorbetes",
-                "magdalenas-y-muffins",
-                "meriendas",
-                "natillas",
-                "postres",
-                "postres-tradicionales",
-                "tartaletas-y-hojaldres",
-                "tartas"
-            ]
+            categories = ["tartas"]
             scrape_and_save_by_category(categories)
+
             count = Receta.objects.count()
             return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
         except Exception as e:
+            print(f"Error en scrape_start: {e}")  # Registro detallado
             return JsonResponse({"success": False, "message": str(e)}, status=500)
-    else:
-        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+    return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
 
 
 @login_required(login_url="/login/")
 def scrape_status(request):
     if request.method == "GET":
-        context = {}
-        html_template = loader.get_template('recetas/list.html')
-        return HttpResponse(html_template.render(context, request))
-    else:
-        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+        try:
+            recetas = Receta.objects.all()
+            context = {'recetas': recetas}
+            html_template = loader.get_template('recetas/list.html')
+            return HttpResponse(html_template.render(context, request))
+        except Exception as e:
+            print(f"Error en scrape_status: {e}")
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)

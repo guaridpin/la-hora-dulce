@@ -32,5 +32,4 @@ apps/static/assets/.temp
 .ccache/*
 .boto/*
 .cache/*
-.coverage/
 .bash_history/*
