@@ -36,7 +36,7 @@ def scrape_recipes_by_category(categories):
         soup = BeautifulSoup(response.content, 'lxml')
 
         # Obtener o crear la categoría
-        category, created = Category.objects.get_or_create(nombre=category_name)
+        category, created = Category.objects.get_or_create(name=category_name)
         if created:
             print(f"Categoría creada: {category_name}")
 
@@ -102,7 +102,7 @@ def scrape_recipe(url, category):
     # Crear o buscar al autor
     author = None
     if author_name:
-        author, created = Author.objects.get_or_create(nombre=author_name)
+        author, created = Author.objects.get_or_create(name=author_name)
         if created:
             print(f"Nuevo autor creado: {author_name}")
 
