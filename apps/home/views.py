@@ -6,7 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 import json
 from django.http import JsonResponse
 from apps.scraper.utils import scrape_and_save_by_category
-from .models import Receta
+from .models import Recipe
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -55,7 +55,7 @@ def scrape_start(request):
             categories = ["tartas"]
             scrape_and_save_by_category(categories)
 
-            count = Receta.objects.count()
+            count = Recipe.objects.count()
             return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
         except Exception as e:
             print(f"Error en scrape_start: {e}")  # Registro detallado
@@ -67,7 +67,7 @@ def scrape_start(request):
 def scrape_status(request):
     if request.method == "GET":
         try:
-            recetas = Receta.objects.all()
+            recetas = Recipe.objects.all()
             context = {'recetas': recetas}
             html_template = loader.get_template('recetas/list.html')
             return HttpResponse(html_template.render(context, request))

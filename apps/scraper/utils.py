@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from apps.home.models import Receta, Autor, Categoria
+from apps.home.models import Recipe, Category, Author
 
 # Líneas para evitar error SSL
 import os
@@ -10,16 +10,15 @@ if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverif
     ssl._create_default_https_context = ssl._create_unverified_context
 
 BASE_URL = "https://canalcocina.es/recetas/?buscar-texto=&categoria="
-
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 
 def scrape_recipes_by_category(categories):
     # Borrar tablas
-    Receta.objects.all().delete()
-    Categoria.objects.all().delete()
-    Autor.objects.all().delete()
+    Recipe.objects.all().delete()
+    Category.objects.all().delete()
+    Author.objects.all().delete()
 
     all_recipes = []
 
@@ -37,7 +36,7 @@ def scrape_recipes_by_category(categories):
         soup = BeautifulSoup(response.content, 'lxml')
 
         # Obtener o crear la categoría
-        category, created = Categoria.objects.get_or_create(nombre=category_name)
+        category, created = Category.objects.get_or_create(nombre=category_name)
         if created:
             print(f"Categoría creada: {category_name}")
 
@@ -89,10 +88,6 @@ def scrape_recipe(url, category):
     difficulty = next((part.split(':')[1].strip() for part in time_parts if 'Dificultad' in part), None)
     servings = next((part.split(':')[1].strip() for part in time_parts if 'Comensales' in part), None)
 
-    # Extraer imagen
-    image_tag = soup.find(itemprop="image")
-    image_url = image_tag['src'] if image_tag else None
-
     # Extraer ingredientes
     ingredients = [li.text.strip() for li in soup.find_all(itemprop="recipeIngredient")]
 
@@ -107,12 +102,12 @@ def scrape_recipe(url, category):
     # Crear o buscar al autor
     author = None
     if author_name:
-        author, created = Autor.objects.get_or_create(name=author_name)
+        author, created = Author.objects.get_or_create(nombre=author_name)
         if created:
             print(f"Nuevo autor creado: {author_name}")
 
     # Crear o actualizar la receta
-    Receta.objects.update_or_create(
+    Recipe.objects.update_or_create(
         source_url=url,
         defaults={
             "title": title,
@@ -123,9 +118,8 @@ def scrape_recipe(url, category):
             "difficulty": difficulty,
             "servings": servings,
             "ingredients": "\n".join(ingredients),
-            "instructions": instructions,
+            "steps": instructions,
             "tags": tags,
-            "image_url": image_url,
         }
     )
 
