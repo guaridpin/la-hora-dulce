@@ -28,7 +28,6 @@ def scrape_recipes_by_category(categories):
         try:
             response = requests.get(url, headers=HEADERS)
             response.raise_for_status()
-            print("Acceso correcto a la categoría")
         except requests.RequestException as e:
             print(f"Error al acceder a la categoría {category_name}: {e}")
             continue
@@ -71,9 +70,9 @@ def scrape_recipe(url, category_name):
 
     # Extraer título
     title_tag = soup.find("h1", class_="underline", itemprop="name")
-    title = title_tag.text.split('\n')[0].strip() if title_tag else None
+    title = title_tag.contents[0].strip() if title_tag else None
     if not title:
-        print(f"No se encontró un título para la receta en {url}.")
+        print(f"\tNo se encontró un título para la receta en {url}.")
         return
 
     # Extraer nombre del autor
@@ -82,19 +81,30 @@ def scrape_recipe(url, category_name):
 
     # Extraer programa
     program_tag = soup.find("a", title=True)
-    program = program_tag.text.strip() if program_tag else None
+    program = program_tag.text.replace('PROGRAMA:', '').strip() if program_tag else None
 
     # Extraer tiempo, dificultad y comensales
-    time_info = soup.find("h1", class_="underline")
-    time_parts = [part.strip() for part in time_info.text.split('|') if ':' in part] if time_info else []
-    time = next((part.split(':')[1].strip() for part in time_parts if 'Tiempo' in part), None)
-    difficulty = next((part.split(':')[1].strip() for part in time_parts if 'Dificultad' in part), None)
-    servings = next((part.split(':')[1].strip() for part in time_parts if 'Comensales' in part), None)
+    details_tag = title_tag.find_all("span", style="font-size:14px;")
+    time, difficulty, servings = None, None, None
+
+    for detail in details_tag:
+        text = detail.text.strip()
+    
+        # Separar las partes usando "|"
+        parts = text.split("|")
+    
+        for part in parts:
+            if "Tiempo:" in part:
+                time = part.split(":")[1].strip()
+            elif "Dificultad:" in part:
+                difficulty = part.split(":")[1].strip()
+            elif "Comensales:" in part:
+                servings = part.split(":")[1].strip()
 
     # Extraer ingredientes
     ingredients = [li.text.strip() for li in soup.find_all(itemprop="recipeIngredient")]
     if not ingredients:
-        print(f"No se encontraron ingredientes para la receta: {title}.")
+        print(f"\tNo se encontraron ingredientes para la receta: {title}.")
         return
 
     # Extraer instrucciones
@@ -110,12 +120,12 @@ def scrape_recipe(url, category_name):
     if author_name:
         author, created = Author.objects.get_or_create(name=author_name)
         if created:
-            print(f"Nuevo autor creado: {author_name}")
+            print(f"\tNuevo autor creado: {author_name}")
 
     # Crear o buscar la categoría
     category, created = Category.objects.get_or_create(name=category_name)
     if created:
-        print(f"Nueva categoría creada: {category_name}")
+        print(f"\tNueva categoría creada: {category_name}")
 
     # Crear o actualizar la receta
     recipe, created = Recipe.objects.update_or_create(

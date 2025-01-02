@@ -52,7 +52,24 @@ def pages(request):
 def scrape_start(request):
     if request.method == "POST":
         try:
-            categories = ["tartas"]
+            categories = [
+                "arroz-con-leche",
+                "bizcochos",
+                "chocolate",
+                "crepes-y-tortitas",
+                "cupcakes",
+                "desayunos",
+                "flanes",
+                "galletas",
+                "helados-y-sorbetes",
+                "magdalenas-y-muffins",
+                "meriendas",
+                "natillas",
+                "postres",
+                "postres-tradicionales",
+                "tartaletas-y-hojaldres",
+                "tartas"
+            ]
             scrape_and_save_by_category(categories)
 
             count = Recipe.objects.count()
