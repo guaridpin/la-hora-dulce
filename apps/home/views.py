@@ -5,8 +5,10 @@ Copyright (c) 2019 - present AppSeed.us
 
 import json
 from django.http import JsonResponse
+from django.shortcuts import render
 from apps.scraper.utils import scrape_and_save_by_category
 from .models import Recipe
+from apps.scraper.whoosh_index import search_recipes
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -92,3 +94,10 @@ def scrape_status(request):
             print(f"Error en scrape_status: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+
+
+@login_required(login_url="/login/")
+def search_view(request):
+    query = request.GET.get('q', '')
+    results = search_recipes(query) if query else []
+    return render(request, 'recetas/search_results.html', {'query': query, 'results': results})

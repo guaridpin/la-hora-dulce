@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Resultados de búsqueda{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Resultados de búsqueda</h1>
+  <p>Resultados para: <strong>{{ query }}</strong></p>
+
+  {% if results %}
+    <ul class="list-group">
+      {% for result in results %}
+        <li class="list-group-item">
+          <h5>{{ result.title }}</h5>
+          <p>
+            Autor: {{ result.author }} | Categoría: {{ result.category }} |
+            Tiempo: {{ result.time }} | Dificultad: {{ result.difficulty }}
+          </p>
+          <!-- <a href="/recipes/{{ result.id }}" class="btn btn-primary btn-sm">Ver receta</a>-->
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No se encontraron resultados para "{{ query }}".</p>
+  {% endif %}
+</div>
+{% endblock %}
