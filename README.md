@@ -22,15 +22,10 @@
 
 ## Tabla de Contenidos
 
-- [Demo](#demo)
 - [Inicio Rápido](#inicio-rápido)
 - [Estructura del Proyecto](#estructura-del-proyecto)
-- [Soporte de Navegadores](#soporte-de-navegadores)
 - [Recursos](#recursos)
-- [Reporte de Problemas](#reporte-de-problemas)
-- [Soporte Técnico](#soporte-técnico)
 - [Licencia](#licencia)
-- [Enlaces Útilies](#enlaces-útiles)
 
 ---
 
