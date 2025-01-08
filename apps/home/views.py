@@ -133,7 +133,7 @@ def recipe_detail(request, recipe_id):
         with ix.searcher() as searcher:
             doc = searcher.document(id=recipe_id)
             if not doc:
-                return render(request, 'recetas/404.html', {"message": "Receta no encontrada"})
+                return render(request, 'home/page-404.html', {"message": "Receta no encontrada"})
 
             # Pasar los datos al contexto
             context = {

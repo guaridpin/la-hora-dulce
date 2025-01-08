@@ -102,7 +102,7 @@ def scrape_and_index_recipe(url, category_name, writer):
     recipe_id = hashlib.md5(url.encode('utf-8')).hexdigest()
 
     writer.add_document(
-        id=url,
+        id=recipe_id,
         title=title,
         author=author_name,
         category=formatted_category_name,

@@ -37,6 +37,7 @@ def search_recipes(query):
         parser = MultifieldParser(["title", "ingredients", "tags"], ix.schema)
         query = parser.parse(query)
         results = searcher.search(query, limit=10)  # Limita los resultados a 10
+        unique_results = {r["id"]: r for r in results}  # Elimina duplicados usando un diccionario
         return [{
             "id": r["id"],
             "title": r["title"],
@@ -45,4 +46,4 @@ def search_recipes(query):
             "time": r["time"],
             "difficulty": r["difficulty"],
             "image_url": r["image_url"]
-        } for r in results]
+        } for r in unique_results.values()]
