@@ -29,26 +29,26 @@ def get_or_create_index():
         return create_in(index_dir, schema)
     return open_dir(index_dir)
 
-def index_recipes():
-    ix = get_or_create_index()
-    writer = ix.writer()
-    recipes = Recipe.objects.all()  # Obtén todas las recetas de la base de datos
+# def index_recipes():
+#     ix = get_or_create_index()
+#     writer = ix.writer()
+#     recipes = Recipe.objects.all()  # Obtén todas las recetas de la base de datos
 
-    for recipe in recipes:
-        writer.add_document(
-            id=str(recipe.id),
-            title=recipe.title,
-            author=recipe.author.name if recipe.author else "Desconocido",
-            category=recipe.category.name if recipe.category else "Sin categoría",
-            program=recipe.program or "N/A",
-            time=recipe.time or "N/A",
-            difficulty=recipe.difficulty or "N/A",
-            servings=recipe.servings or "N/A",
-            ingredients=recipe.ingredients,
-            steps=recipe.steps,
-            tags=recipe.tags or ""
-        )
-    writer.commit()
+#     for recipe in recipes:
+#         writer.add_document(
+#             id=str(recipe.id),
+#             title=recipe.title,
+#             author=recipe.author.name if recipe.author else "Desconocido",
+#             category=recipe.category.name if recipe.category else "Sin categoría",
+#             program=recipe.program or "N/A",
+#             time=recipe.time or "N/A",
+#             difficulty=recipe.difficulty or "N/A",
+#             servings=recipe.servings or "N/A",
+#             ingredients=recipe.ingredients,
+#             steps=recipe.steps,
+#             tags=recipe.tags or ""
+#         )
+#     writer.commit()
 
 def search_recipes(query):
     ix = get_or_create_index()

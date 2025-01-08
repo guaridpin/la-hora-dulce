@@ -6,7 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 import json
 from django.http import JsonResponse
 from django.shortcuts import render
-from apps.scraper.utils import scrape_and_save_by_category
+from apps.scraper.utils import scrape_and_save_by_category, get_or_create_index
 from .models import Recipe
 from apps.scraper.whoosh_index import search_recipes
 from django import template
@@ -72,9 +72,9 @@ def scrape_start(request):
                 "tartaletas-y-hojaldres",
                 "tartas"
             ]
-            scrape_and_save_by_category(categories)
+            count = scrape_and_save_by_category(categories)
 
-            count = Recipe.objects.count()
+            # count = Recipe.objects.count()
             return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
         except Exception as e:
             print(f"Error en scrape_start: {e}")  # Registro detallado
@@ -86,8 +86,33 @@ def scrape_start(request):
 def scrape_status(request):
     if request.method == "GET":
         try:
-            recetas = Recipe.objects.all()
-            context = {'recetas': recetas}
+            ix = get_or_create_index()
+
+            with ix.searcher() as searcher:
+                # Contar el número total de recetas indexadas
+                total_recipes = searcher.doc_count_all()
+                results = searcher.documents()
+                
+                # Opcional: Si quieres devolver datos adicionales, procesa los documentos
+                recipies = [
+                    {
+                        "id": r["id"],
+                        "title": r["title"],
+                        "author": r["author"],
+                        "category": r["category"],
+                        "program": r["program"],
+                        "time": r["time"],
+                        "difficulty": r["difficulty"],
+                        "servings": r["servings"],
+                        "ingredients": r["ingredients"],
+                        "steps": r["steps"],
+                        "tags": r["tags"]
+                    } for r in results
+                ]
+            
+            # Pasar el total de recetas indexadas al contexto
+            context = {'total_recipes': total_recipes, 'recetas': recipies}
+            
             html_template = loader.get_template('recetas/list.html')
             return HttpResponse(html_template.render(context, request))
         except Exception as e:
