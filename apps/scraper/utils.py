@@ -1,3 +1,4 @@
+import hashlib
 import requests
 from bs4 import BeautifulSoup
 from apps.scraper.whoosh_index import get_or_create_index
@@ -89,19 +90,30 @@ def scrape_and_index_recipe(url, category_name, writer):
 
     tags_container = soup.select(".list-grey a")
     tags = ", ".join([a.text.strip() for a in tags_container])
+    
+    # Extraer la URL de la imagen
+    image_container = soup.find("div", class_="bigger")
+    image_tag = image_container.find("img") if image_container else None
+    image_url = image_tag["src"] if image_tag and "src" in image_tag.attrs else "N/A"
+    
+    formatted_category_name = category_name.replace("-", " ").title()
+
+    # Generar un ID único basado en la URL
+    recipe_id = hashlib.md5(url.encode('utf-8')).hexdigest()
 
     writer.add_document(
         id=url,
         title=title,
         author=author_name,
-        category=category_name,
+        category=formatted_category_name,
         program=program,
         time=time or "N/A",
         difficulty=difficulty or "N/A",
         servings=servings or "N/A",
         ingredients="\n".join(ingredients),
         steps=instructions,
-        tags=tags
+        tags=tags,
+        image_url=image_url
     )
     print(f"Receta indexada: {title}")
     return True

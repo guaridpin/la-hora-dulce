@@ -2,6 +2,12 @@
 
 {% block title %}Resultados de búsqueda{% endblock %}
 
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<!-- Incluye los estilos de Bootstrap y cualquier otro CSS necesario -->
+<link rel="stylesheet" href="/static/assets/css/custom.css" type="text/css">
+{% endblock stylesheets %} 
+
 {% block content %}
 <div class="container mt-4">
   <h1>Resultados de búsqueda</h1>
@@ -10,18 +16,46 @@
   {% if results %}
     <ul class="list-group">
       {% for result in results %}
-        <li class="list-group-item">
-          <h5>{{ result.title }}</h5>
-          <p>
-            Autor: {{ result.author }} | Categoría: {{ result.category }} |
-            Tiempo: {{ result.time }} | Dificultad: {{ result.difficulty }}
-          </p>
-          <!-- <a href="/recipes/{{ result.id }}" class="btn btn-primary btn-sm">Ver receta</a>-->
+      <a href="{% url 'recipe_detail' result.id %}" class="text-decoration-none">
+        <li class="list-group-item d-flex align-items-center">
+          {% if result.image_url == "N/A" %}
+            <img 
+              src="/static/assets/img/theme/imagen_no_encontrada.jpg" 
+              alt="Imagen por defecto" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"
+            >
+          {% else %}
+            <img 
+              src="{{ result.image_url }}" 
+              alt="Imagen de {{ result.title }}" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"
+            >
+          {% endif %}
+          <div>
+            <h2>{{ result.title }}</h2>
+            <p>
+              <strong>Autor:</strong> {{ result.author }}
+              <strong> Categoría:</strong> {{ result.category }}
+              <strong> Tiempo:</strong> {{ result.time }}
+              <strong> Dificultad:</strong> {{ result.difficulty }}
+            </p>
+          </div>
         </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>No se encontraron resultados para "{{ query }}".</p>
   {% endif %}
+  {% include "includes/footer.html" %}
 </div>
 {% endblock %}
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<!-- Incluye Popper.js y Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Archivo JavaScript personalizado -->
+<script src="/static/assets/js/custom.js"></script>
+{% endblock javascripts %}

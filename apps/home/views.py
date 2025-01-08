@@ -74,7 +74,6 @@ def scrape_start(request):
             ]
             count = scrape_and_save_by_category(categories)
 
-            # count = Recipe.objects.count()
             return JsonResponse({"success": True, "message": f"{count} recetas cargadas"})
         except Exception as e:
             print(f"Error en scrape_start: {e}")  # Registro detallado
@@ -126,3 +125,30 @@ def search_view(request):
     query = request.GET.get('q', '')
     results = search_recipes(query) if query else []
     return render(request, 'recetas/search_results.html', {'query': query, 'results': results})
+
+@login_required(login_url="/login/")
+def recipe_detail(request, recipe_id):
+    try:
+        ix = get_or_create_index()
+        with ix.searcher() as searcher:
+            doc = searcher.document(id=recipe_id)
+            if not doc:
+                return render(request, 'recetas/404.html', {"message": "Receta no encontrada"})
+
+            # Pasar los datos al contexto
+            context = {
+                "title": doc.get("title"),
+                "author": doc.get("author"),
+                "category": doc.get("category"),
+                "program": doc.get("program"),
+                "time": doc.get("time"),
+                "difficulty": doc.get("difficulty"),
+                "servings": doc.get("servings"),
+                "ingredients": doc.get("ingredients"),
+                "steps": doc.get("steps"),
+                "tags": doc.get("tags"),
+                "image_url": doc.get("image_url"),
+            }
+            return render(request, 'recetas/recipe_detail.html', context)
+    except Exception as e:
+        return render(request, 'home/page-404.html', {"message": str(e)})
