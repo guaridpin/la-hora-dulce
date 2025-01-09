@@ -10,19 +10,18 @@
 
 {% block content %}
 <!-- Header -->
-<!-- Header -->
-<div class="header bg-primary pb-1">
+<div class="header bg-primary pb-4">
     <div class="container-fluid">
       <div class="header-body">
-        <div class="row align-items-center py-4">
+        <div class="row align-items-center py-3">
           <div class="col-lg-6 col-7">
-            <h6 class="h2 text-white d-inline-block mb-0">Tiempo y dificultad</h6>
-            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+            <h6 class="h2 text-white d-inline-block mb-0">Tiempo y Dificultad</h6>
+            <nav aria-label="breadcrumb" class="d-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item">
                   <a href="/"><i class="fas fa-home"></i></a>
                 </li>
-                <li class="breadcrumb-item"><a href="{% url 'filter_by_time_and_difficulty' %}">Tiempo y dificultad</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'filter_by_time_and_difficulty' %}">Tiempo y Dificultad</a></li>
               </ol>
             </nav>
           </div>
@@ -30,63 +29,78 @@
       </div>
     </div>
 </div>
+
 <!-- Page content -->
-<div class="container mt-4">
-    <h1 class="mb-4">Selecciona Tiempo y Dificultad</h1>
-    
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Selecciona Tiempo y Dificultad</h1>
+
     {% if error %}
-      <div class="alert alert-danger">
+      <div class="alert alert-danger text-center">
         {{ error }}
       </div>
     {% endif %}
-    
-    <form method="post" action="{% url 'filter_by_time_and_difficulty' %}">
-      {% csrf_token %}
-  
-      <div class="mb-4">
-        <h3>Tiempo</h3>
-        <div>
-          {% for time in times %}
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                name="time"
-                value="{{ time }}"
-                id="time_{{ forloop.counter }}"
-              >
-              <label class="form-check-label" for="time_{{ forloop.counter }}">
-                {{ time|title }}
-              </label>
+
+    <div class="card shadow">
+      <div class="card-body">
+        <form method="post" action="{% url 'filter_by_time_and_difficulty' %}">
+          {% csrf_token %}
+
+          <div class="mb-5">
+            <h3 class="mb-3"><i class="fas fa-clock text-primary"></i> Tiempo</h3>
+            <div class="row">
+              {% for time in times %}
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="time"
+                      value="{{ time }}"
+                      id="time_{{ forloop.counter }}"
+                    >
+                    <label class="form-check-label" for="time_{{ forloop.counter }}">
+                      {{ time|title }}
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
-      </div>
-  
-      <div class="mb-4">
-        <h3>Dificultad</h3>
-        <div>
-          {% for difficulty in difficulties %}
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                name="difficulty"
-                value="{{ difficulty }}"
-                id="difficulty_{{ forloop.counter }}"
-              >
-              <label class="form-check-label" for="difficulty_{{ forloop.counter }}">
-                {{ difficulty|title }}
-              </label>
+          </div>
+
+          <div class="mb-5">
+            <h3 class="mb-3"><i class="fas fa-chart-line text-warning"></i> Dificultad</h3>
+            <div class="row">
+              {% for difficulty in difficulties %}
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="difficulty"
+                      value="{{ difficulty }}"
+                      id="difficulty_{{ forloop.counter }}"
+                    >
+                    <label class="form-check-label" for="difficulty_{{ forloop.counter }}">
+                      {{ difficulty|title }}
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
+          </div>
+
+          <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-filter"></i> Filtrar recetas
+            </button>
+          </div>
+        </form>
       </div>
-      <button type="submit" class="btn btn-primary">Filtrar recetas</button>
-    </form>
+    </div>
     {% include "includes/footer.html" %}
-  </div>
+</div>
 {% endblock %}
+
 {% block javascripts %}
 <!-- Incluye Popper.js y Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
