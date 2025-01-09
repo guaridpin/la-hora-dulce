@@ -7,7 +7,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from apps.scraper.utils import scrape_and_save_by_category, get_or_create_index
-from apps.scraper.whoosh_index import get_categories_from_index, search_recipes
+from apps.scraper.whoosh_index import get_categories_from_index, get_time_and_difficulty_from_index, search_recipes
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -237,3 +237,52 @@ def filter_by_category(request):
     categories = get_categories_from_index()
 
     return render(request, "recetas/filter_categories.html", {"categories": categories})
+
+@login_required(login_url="/login/")
+def filter_by_time_and_difficulty(request):
+    if request.method == "POST":
+        # Obtener los valores seleccionados
+        selected_times = request.POST.getlist("time")
+        selected_difficulties = request.POST.getlist("difficulty")
+
+        # Validar que se seleccionen ambos valores
+        if not selected_times or not selected_difficulties:
+            return render(request, "recetas/filter_time_difficulty.html", {
+                "error": "Debes seleccionar al menos un tiempo y una dificultad.",
+                "times": get_time_and_difficulty_from_index()[0],
+                "difficulties": get_time_and_difficulty_from_index()[1],
+            })
+
+        # Crear una consulta combinada exacta para tiempo y dificultad
+        combined_queries = []
+        for time in selected_times:
+            for difficulty in selected_difficulties:
+                # Agregar la combinación exacta como una subconsulta
+                combined_queries.append(f'(time:"{time}" AND difficulty:"{difficulty}")')
+
+        # Unir las subconsultas con OR para permitir múltiples combinaciones
+        query = " OR ".join(combined_queries)
+
+        # Configurar la paginación
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 10))
+
+        # Buscar recetas que coincidan con las combinaciones seleccionadas
+        search_data = search_recipes(query, page=page, page_size=page_size)
+
+        return render(request, "recetas/search_results.html", {
+            "query": " + ".join(selected_times + selected_difficulties),
+            "results": search_data["results"],
+            "total_results": search_data["total_results"],
+            "page": search_data["page"],
+            "page_size": search_data["page_size"],
+            "total_pages": search_data["total_pages"],
+        })
+
+    # Obtener las categorías dinámicamente desde el índice
+    times, difficulties = get_time_and_difficulty_from_index()
+
+    return render(request, "recetas/filter_time_difficulty.html", {
+        "times": times,
+        "difficulties": difficulties
+    })

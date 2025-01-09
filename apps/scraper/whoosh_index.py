@@ -88,3 +88,20 @@ def get_categories_from_index():
             if "category" in doc and doc["category"]:
                 categories.add(doc["category"])
     return sorted(categories)
+
+
+def get_time_and_difficulty_from_index():
+    """
+    Extrae los valores únicos de tiempo y dificultad del índice Whoosh.
+    """
+    ix = get_or_create_index()
+    times = set()
+    difficulties = set()
+    with ix.searcher() as searcher:
+        for doc in searcher.documents():  # Iterar sobre todos los documentos
+            if "time" in doc and doc["time"] and doc["time"].lower() != "n/a":
+                times.add(doc["time"].lower())  # Normalizamos a minúsculas
+            if "difficulty" in doc and doc["difficulty"] and doc["difficulty"].lower() != "n/a":
+                difficulties.add(doc["difficulty"].lower())  # Normalizamos a minúsculas
+    return sorted(times), sorted(difficulties)
+

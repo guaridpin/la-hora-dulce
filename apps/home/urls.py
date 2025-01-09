@@ -14,6 +14,7 @@ urlpatterns = [
     path('recipe/<path:recipe_id>/', views.recipe_detail, name='recipe_detail'),
     path("filter-ingredients/", views.filter_by_ingredients, name="filter_by_ingredients"),
     path("filter-categories/", views.filter_by_category, name="filter_by_category"),
+    path("filter-time-difficulty/", views.filter_by_time_and_difficulty, name="filter_by_time_and_difficulty"),
     re_path(r'^.*\.*', views.pages, name='pages'),
 ]
 
