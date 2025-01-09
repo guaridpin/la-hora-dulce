@@ -7,12 +7,13 @@
 <link rel="stylesheet" href="/static/assets/css/custom.css" type="text/css">
 <style>
   .recipe-container {
+    position: relative;
     padding: 20px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-  }
+  }  
   .recipe-title {
     text-align: center;
     margin-bottom: 20px;
@@ -46,6 +47,19 @@
   .recipe-section p {
     margin: 5px 0;
   }
+  .favorite-container {
+    position: absolute;
+    top: 20px; /* Ajusta la distancia desde la parte superior */
+    right: 20px; /* Ajusta la distancia desde la parte derecha */
+    z-index: 10; /* Asegura que esté encima de otros elementos */
+  }
+  
+  #favorite-btn {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+  }
+  
 </style>
 {% endblock stylesheets %}
 
@@ -74,16 +88,18 @@
 <div class="container mt-4">
   <!-- Contenedor de título e imagen -->
   <div class="recipe-container">
+    <div class="favorite-container">
+      <button id="favorite-btn" class="btn btn-outline-danger" data-recipe-id="{{ recipe_id }}" 
+              data-recipe-title="{{ title }}" data-recipe-image="{{ image_url }}">
+        <i class="fa{% if is_favorite %}s{% else %}r{% endif %} fa-heart"></i>
+      </button>
+    </div>
     <h1 class="recipe-title">{{ title }}</h1>
     {% if image_url == "N/A" %}
       <img src="/static/assets/img/theme/imagen_no_encontrada.jpg" alt="Imagen por defecto" class="recipe-image">
     {% else %}
       <img src="{{ image_url }}" alt="Imagen de {{ title }}" class="recipe-image">
     {% endif %}
-    <button id="favorite-btn" class="btn btn-outline-danger" data-recipe-id="{{ recipe_id }}" data-recipe-title="{{ title }}" data-recipe-image="{{ image_url }}">
-    <i class="fa{% if is_favorite %}s{% else %}r{% endif %} fa-heart"></i>
-    {% if is_favorite %} Quitar de Favoritos {% else %} Añadir a Favoritos {% endif %}
-    </button>
     <div class="recipe-info">
       <p><strong>Autor:</strong> {{ author }} | <strong>Categoría:</strong> {{ category }} | 
       <strong>Programa:</strong> {{ program }} | <strong>Tiempo:</strong> {{ time }} | 
@@ -142,9 +158,9 @@
     .then(response => response.json())
     .then(data => {
       if (data.status === "added") {
-        button.innerHTML = '<i class="fas fa-heart"></i> Quitar de Favoritos';
+        button.innerHTML = '<i class="fas fa-heart"></i>';
       } else if (data.status === "removed") {
-        button.innerHTML = '<i class="far fa-heart"></i> Añadir a Favoritos';
+        button.innerHTML = '<i class="far fa-heart"></i>';
       }
     });
   });

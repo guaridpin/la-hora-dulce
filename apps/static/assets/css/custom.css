@@ -52,3 +52,15 @@ html, body {
   flex-direction: column;
 }
 
+.navbar .form-inline {
+  margin-right: auto; /* Mueve el formulario a la izquierda */
+}
+
+.navbar .ml-auto {
+  margin-left: auto; /* Mueve el perfil a la derecha */
+}
+
+.navbar-collapse {
+  display: flex !important; /* Asegura el comportamiento de flexbox */
+  justify-content: space-between; /* Separa los elementos */
+}
