@@ -17,6 +17,7 @@ HEADERS = {
 def scrape_recipes_by_category(categories):
     ix = get_or_create_index()
     writer = ix.writer()
+    writer.commit(mergetype=writer.CLEAR)  # Limpia el índice
     recipe_count = 0  # Contador de recetas
 
     for category_name in categories:
