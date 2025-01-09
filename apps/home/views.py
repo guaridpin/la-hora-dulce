@@ -170,3 +170,44 @@ def recipe_detail(request, recipe_id):
             return render(request, 'recetas/recipe_detail.html', context)
     except Exception as e:
         return render(request, 'home/page-404.html', {"message": str(e)})
+    
+
+# Lista de ingredientes categorizados
+INGREDIENTES = {
+    "Ingredientes básicos": [
+        "Harina", "Azúcar", "Huevos", "Mantequilla", "Aceite vegetal",
+        "Leche", "Nata", "Yogur", "Levadura"
+    ],
+    "Endulzantes y aromatizantes": [
+        "Vainilla", "Azúcar glas", "Miel", "Edulcorante"
+    ],
+    "Cacao y chocolate": ["Cacao", "Chocolate"],
+    "Frutas frescas": [
+        "Plátano", "Manzana", "Fresas", "Arándanos", "Frambuesas",
+        "Cerezas", "Mango", "Limón", "Naranja", "Piña", "Pera", "Boniato"
+    ]
+}
+
+
+@login_required(login_url="/login/")
+def filter_by_ingredients(request):
+    if request.method == "POST":
+        # Obtener los ingredientes seleccionados
+        selected_ingredients = request.POST.getlist("ingredients")
+        query = " OR ".join(selected_ingredients)  # Crear una consulta OR para buscar cualquiera de los ingredientes
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 10))
+
+        # Buscar recetas que contengan los ingredientes
+        search_data = search_recipes(query, page=page, page_size=page_size)
+
+        return render(request, "recetas/search_results.html", {
+            "query": ", ".join(selected_ingredients),
+            "results": search_data["results"],
+            "total_results": search_data["total_results"],
+            "page": search_data["page"],
+            "page_size": search_data["page_size"],
+            "total_pages": search_data["total_pages"],
+        })
+
+    return render(request, "recetas/filter_ingredients.html", {"ingredientes": INGREDIENTES})

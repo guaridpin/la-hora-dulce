@@ -12,6 +12,7 @@ urlpatterns = [
     path('scraping/status/', views.scrape_status, name='scrape_status'),
     path('search/', views.search_view, name='search'),
     path('recipe/<path:recipe_id>/', views.recipe_detail, name='recipe_detail'),
+    path("filter-ingredients/", views.filter_by_ingredients, name="filter_by_ingredients"),
     re_path(r'^.*\.*', views.pages, name='pages'),
 ]
 
