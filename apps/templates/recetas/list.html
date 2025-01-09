@@ -1,4 +1,4 @@
-{% extends 'layouts/base.html' %} 
+{% extends 'layouts/base.html' %}  
 {% block title %} Cargar recetas {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
@@ -32,46 +32,56 @@
 <!-- Page content -->
 <div class="container-fluid mt--6">
   <div class="row">
-    <div class="col-xl-8">
-      <!-- Botón para iniciar el scraping -->
-      <button class="btn btn-secondary" id="scrape-button">
-        Iniciar scraping
-      </button>
+    <div class="col-xl-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-body text-center">
+          <h3 class="mb-4">Recopilar recetas</h3>
+          <p class="mb-4">Inicia el proceso de scraping para obtener recetas y comenzar a navegar. Este proceso puede tardar hasta 5 minutos. Por favor, ten paciencia.</p>
 
-      <!-- Modal de confirmación -->
-      <div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="confirmModalLabel">Confirmación</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              Esta acción puede hasta 5 minutos. ¿Deseas continuar?
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="button" class="btn btn-primary" id="confirm-scrape">
-                Sí, continuar
-              </button>
+          <!-- Imagen destacada -->
+          <img src="/static/assets/img/theme/cafe.png" alt="Scraping" class="img-fluid mb-4" style="max-width: 200px;">
+
+          <!-- Botón para iniciar el scraping -->
+          <button class="btn btn-secondary btn-lg" id="scrape-button">
+            <i class="fas fa-sync-alt"></i> Iniciar scraping
+          </button>
+
+          <!-- Modal de confirmación -->
+          <div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="confirmModalLabel">Confirmación</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  Esta acción puede tardar hasta 5 minutos. ¿Deseas continuar?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-primary" id="confirm-scrape">
+                    Sí, continuar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Modal de resultados -->
-      <div class="modal fade" id="result-modal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="resultModalLabel">Resultados</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="result-message">
-              <!-- Mensaje dinámico -->
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <!-- Modal de resultados -->
+          <div class="modal fade" id="result-modal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="resultModalLabel">Resultados</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="result-message">
+                  <!-- Mensaje dinámico -->
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
