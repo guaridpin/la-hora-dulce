@@ -65,6 +65,25 @@
         </li>
       {% endfor %}
     </ul>
+    <nav aria-label="Page navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page={{ page|add:"-1" }}&page_size={{ page_size }}">←</a>
+          </li>
+        {% endif %}
+        {% for i in page_numbers %}
+          <li class="page-item {% if i == page %}active{% endif %}">
+            <a class="page-link" href="?q={{ query }}&page={{ i }}&page_size={{ page_size }}">{{ i }}</a>
+          </li>
+        {% endfor %}
+        {% if page < total_pages %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ query }}&page={{ page|add:"1" }}&page_size={{ page_size }}">→</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>       
   {% else %}
     <p>No se encontraron resultados para "{{ query }}".</p>
   {% endif %}

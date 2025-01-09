@@ -31,19 +31,47 @@ def get_or_create_index():
     return open_dir(index_dir)
 
 
-def search_recipes(query):
+def search_recipes(query, page=1, page_size=10):
+    """
+    Busca recetas en el índice con paginación.
+    
+    :param query: La consulta de búsqueda.
+    :param page: El número de página actual.
+    :param page_size: El número de resultados por página.
+    :return: Un diccionario con los resultados paginados y metadatos.
+    """
     ix = get_or_create_index()
     with ix.searcher() as searcher:
         parser = MultifieldParser(["title", "ingredients", "tags"], ix.schema)
         query = parser.parse(query)
-        results = searcher.search(query, limit=10)  # Limita los resultados a 10
-        unique_results = {r["id"]: r for r in results}  # Elimina duplicados usando un diccionario
-        return [{
-            "id": r["id"],
-            "title": r["title"],
-            "author": r["author"],
-            "category": r["category"],
-            "time": r["time"],
-            "difficulty": r["difficulty"],
-            "image_url": r["image_url"]
-        } for r in unique_results.values()]
+        results = searcher.search(query, limit=None)  # Obtener todos los resultados primero
+        
+        # Calcular paginación
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+        paginated_results = results[start_index:end_index]
+        
+        # Crear los resultados en formato deseado
+        formatted_results = [
+            {
+                "id": r["id"],
+                "title": r["title"],
+                "author": r["author"],
+                "category": r["category"],
+                "time": r["time"],
+                "difficulty": r["difficulty"],
+                "image_url": r["image_url"]
+            } for r in paginated_results
+        ]
+        
+        # Datos de metadatos para la paginación
+        total_results = len(results)
+        total_pages = (total_results + page_size - 1) // page_size
+        
+        return {
+            "results": formatted_results,
+            "total_results": total_results,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+        }

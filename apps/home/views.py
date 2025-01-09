@@ -123,8 +123,26 @@ def scrape_status(request):
 @login_required(login_url="/login/")
 def search_view(request):
     query = request.GET.get('q', '')
-    results = search_recipes(query) if query else []
-    return render(request, 'recetas/search_results.html', {'query': query, 'results': results})
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 10))  # Tamaño de página predeterminado
+
+    if query:
+        search_data = search_recipes(query, page=page, page_size=page_size)
+        page_numbers = range(1, search_data["total_pages"] + 1)  # Genera la lista de páginas
+    else:
+        search_data = {"results": [], "total_results": 0, "page": 1, "page_size": page_size, "total_pages": 0}
+        page_numbers = []
+
+    return render(request, 'recetas/search_results.html', {
+        'query': query,
+        'results': search_data["results"],
+        'total_results': search_data["total_results"],
+        'page': search_data["page"],
+        'page_size': search_data["page_size"],
+        'total_pages': search_data["total_pages"],
+        'page_numbers': page_numbers,  # Añadimos la lista de páginas
+    })
+
 
 @login_required(login_url="/login/")
 def recipe_detail(request, recipe_id):
