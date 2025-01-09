@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Mis Favoritos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Mis Favoritos</h1>
+
+  {% if favorites %}
+    <ul class="list-group">
+      {% for favorite in favorites %}
+      <a href="{% url 'recipe_detail' favorite.recipe_id %}" class="text-decoration-none">
+        <li class="list-group-item d-flex align-items-center">
+          {% if favorite.recipe_image == "N/A" %}
+            <img 
+              src="/static/assets/img/theme/imagen_no_encontrada.jpg" 
+              alt="Imagen por defecto" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+          {% else %}
+            <img 
+              src="{{ favorite.recipe_image }}" 
+              alt="Imagen de {{ favorite.recipe_title }}" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+          {% endif %}
+          <div>
+            <h2>{{ favorite.recipe_title }}</h2>
+          </div>
+        </li>
+      </a>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tienes recetas marcadas como favoritas.</p>
+  {% endif %}
+</div>
+{% endblock %}

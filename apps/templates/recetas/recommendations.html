@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Recomendaciones{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Recetas similares</h1>
+  {% if recommendations %}
+    <ul class="list-group">
+      {% for recipe in recommendations %}
+      <a href="{% url 'recipe_detail' recipe.id %}" class="text-decoration-none">
+        <li class="list-group-item d-flex align-items-center">
+          {% if recipe.image_url == "N/A" %}
+            <img 
+              src="/static/assets/img/theme/imagen_no_encontrada.jpg" 
+              alt="Imagen por defecto" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"
+            >
+          {% else %}
+            <img 
+              src="{{ recipe.image_url }}" 
+              alt="Imagen de {{ recipe.title }}" 
+              class="img-fluid me-3"
+              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"
+            >
+          {% endif %}
+          <div>
+            <h2>{{ recipe.title }}</h2>
+            <p>
+              <strong>Categoría:</strong> {{ recipe.category }}
+              <strong> Tiempo:</strong> {{ recipe.time }}
+              <strong> Dificultad:</strong> {{ recipe.difficulty }}
+            </p>
+          </div>
+        </li>
+      </a>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No se encontraron recetas similares.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, KEYWORD
-from whoosh.qparser import QueryParser, MultifieldParser
+from whoosh.qparser import QueryParser, MultifieldParser, OrGroup
 from collections import Counter
 import os
 
@@ -105,3 +105,55 @@ def get_time_and_difficulty_from_index():
                 difficulties.add(doc["difficulty"].lower())  # Normalizamos a minúsculas
     return sorted(times), sorted(difficulties)
 
+
+def recommend_recipes(recipe_id, top_n=5):
+    """
+    Recomienda recetas similares basadas en el contenido, dando más peso a los ingredientes.
+    
+    :param recipe_id: ID de la receta objetivo.
+    :param top_n: Número de recetas a recomendar.
+    :return: Lista de recetas recomendadas.
+    """
+    ix = get_or_create_index()
+
+    with ix.searcher() as searcher:
+        # Obtener la receta objetivo
+        target_recipe = searcher.document(id=recipe_id)
+        if not target_recipe:
+            return []
+
+        # Crear una consulta con mayor peso para los ingredientes
+        query = (
+            f'title:"{target_recipe["title"]}"^1.0 OR '  # Peso normal para el título
+            f'ingredients:({target_recipe["ingredients"]})^2.0 OR '  # Peso más alto para ingredientes
+            f'category:"{target_recipe["category"]}"^1.0 OR '  # Peso normal para categoría
+            f'time:"{target_recipe["time"]}"^0.5 OR '  # Menor peso para tiempo
+            f'difficulty:"{target_recipe["difficulty"]}"^0.5 OR '  # Menor peso para dificultad
+            f'tags:({target_recipe["tags"]})^1.0'  # Peso normal para tags
+        )
+
+        # Crear un parser con soporte para boosting
+        parser = MultifieldParser(
+            ["title", "ingredients", "category", "time", "difficulty", "tags"],
+            schema=ix.schema,
+            group=OrGroup
+        )
+        parsed_query = parser.parse(query)
+
+        # Buscar recetas similares en el índice
+        results = searcher.search(parsed_query, limit=top_n + 1)  # +1 para excluir la receta objetivo
+        recommendations = []
+
+        for result in results:
+            if result["id"] != recipe_id:  # Excluir la receta objetivo
+                recommendations.append({
+                    "id": result["id"],
+                    "title": result["title"],
+                    "category": result["category"],
+                    "time": result["time"],
+                    "difficulty": result["difficulty"],
+                    "image_url": result.get("image_url", "N/A"),
+                    "score": result.score,  # Puntuación de similitud
+                })
+
+        return recommendations

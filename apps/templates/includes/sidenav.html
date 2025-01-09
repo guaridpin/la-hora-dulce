@@ -36,17 +36,11 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'scrape_status' %}">
+            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'my_favorites' %}">
                 <i class="ni ni-favourite-28 text-primary"></i>
               <span class="nav-link-text">Mis favoritos</span>
             </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'scrape_status' %}">
-                <i class="ni ni-like-2 text-primary"></i>
-              <span class="nav-link-text">Recomendaciones</span>
-            </a>
-          </li>            
+          </li>           
         </ul>
         <!-- Divider -->
       </div>

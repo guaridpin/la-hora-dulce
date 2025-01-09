@@ -15,6 +15,9 @@ urlpatterns = [
     path("filter-ingredients/", views.filter_by_ingredients, name="filter_by_ingredients"),
     path("filter-categories/", views.filter_by_category, name="filter_by_category"),
     path("filter-time-difficulty/", views.filter_by_time_and_difficulty, name="filter_by_time_and_difficulty"),
+    path("recommendations/<path:recipe_id>/", views.recommend_view, name="recommendations"),
+    path("toggle-favorite/", views.toggle_favorite, name="toggle_favorite"),
+    path("my-favorites/", views.my_favorites, name="my_favorites"),
     re_path(r'^.*\.*', views.pages, name='pages'),
 ]
 

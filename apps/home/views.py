@@ -6,8 +6,9 @@ Copyright (c) 2019 - present AppSeed.us
 import json
 from django.http import JsonResponse
 from django.shortcuts import render
+from apps.home.models import Favorite
 from apps.scraper.utils import scrape_and_save_by_category, get_or_create_index
-from apps.scraper.whoosh_index import get_categories_from_index, get_time_and_difficulty_from_index, search_recipes
+from apps.scraper.whoosh_index import get_categories_from_index, get_time_and_difficulty_from_index, recommend_recipes, search_recipes
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -151,9 +152,13 @@ def recipe_detail(request, recipe_id):
             doc = searcher.document(id=recipe_id)
             if not doc:
                 return render(request, 'home/page-404.html', {"message": "Receta no encontrada"})
+            
+            # Verificar si la receta es favorita
+            is_favorite = Favorite.objects.filter(user=request.user, recipe_id=recipe_id).exists()
 
             # Pasar los datos al contexto
             context = {
+                "recipe_id": recipe_id,
                 "title": doc.get("title"),
                 "author": doc.get("author"),
                 "category": doc.get("category"),
@@ -165,6 +170,7 @@ def recipe_detail(request, recipe_id):
                 "steps": doc.get("steps"),
                 "tags": doc.get("tags"),
                 "image_url": doc.get("image_url"),
+                "is_favorite": is_favorite,
             }
             return render(request, 'recetas/recipe_detail.html', context)
     except Exception as e:
@@ -286,3 +292,55 @@ def filter_by_time_and_difficulty(request):
         "times": times,
         "difficulties": difficulties
     })
+
+
+@login_required(login_url="/login/")
+def recommend_view(request, recipe_id):
+    # Obtener las recomendaciones
+    recommendations = recommend_recipes(recipe_id)
+
+    # Renderizar los resultados
+    return render(request, "recetas/recommendations.html", {
+        "recipe_id": recipe_id,
+        "recommendations": recommendations,
+    })
+    
+    
+@login_required(login_url="/login/")
+def toggle_favorite(request):
+    if request.method == "POST":
+        try:
+            # Parsear el JSON enviado desde la plantilla
+            data = json.loads(request.body)
+            recipe_id = data.get("recipe_id")
+            recipe_title = data.get("recipe_title")
+            recipe_image = data.get("recipe_image", "N/A")
+
+            # Validar que los campos requeridos están presentes
+            if not recipe_id or not recipe_title:
+                return JsonResponse({"status": "error", "message": "Datos incompletos"}, status=400)
+
+            # Crear o eliminar el favorito
+            favorite, created = Favorite.objects.get_or_create(
+                user=request.user,
+                recipe_id=recipe_id,
+                defaults={"recipe_title": recipe_title, "recipe_image": recipe_image},
+            )
+
+            if not created:
+                # Si ya existe, eliminarlo
+                favorite.delete()
+                return JsonResponse({"status": "removed"})
+
+            return JsonResponse({"status": "added"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "JSON inválido"}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
+
+@login_required(login_url="/login/")
+def my_favorites(request):
+    favorites = Favorite.objects.filter(user=request.user)
+    return render(request, "recetas/my_favorites.html", {"favorites": favorites})

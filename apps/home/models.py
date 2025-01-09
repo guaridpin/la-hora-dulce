@@ -27,3 +27,20 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+from django.contrib.auth.models import User
+from django.db import models
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe_id = models.CharField(max_length=255)  # ID único de la receta en Whoosh
+    recipe_title = models.CharField(max_length=255)  # Título de la receta para mostrar en favoritos
+    recipe_image = models.CharField(max_length=255, blank=True, null=True)  # URL de la imagen
+
+    class Meta:
+        unique_together = ('user', 'recipe_id')  # Evitar duplicados
+
+    def __str__(self):
+        return f"{self.user.username} - {self.recipe_title}"
+
