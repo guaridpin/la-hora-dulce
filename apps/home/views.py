@@ -7,8 +7,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from apps.scraper.utils import scrape_and_save_by_category, get_or_create_index
-from .models import Recipe
-from apps.scraper.whoosh_index import search_recipes
+from apps.scraper.whoosh_index import get_categories_from_index, search_recipes
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -211,3 +210,30 @@ def filter_by_ingredients(request):
         })
 
     return render(request, "recetas/filter_ingredients.html", {"ingredientes": INGREDIENTES})
+
+
+@login_required(login_url="/login/")
+def filter_by_category(request):
+    if request.method == "POST":
+        # Obtener las categorías seleccionadas
+        selected_categories = request.POST.getlist("categories")
+        query = " OR ".join(selected_categories)  # Crear una consulta OR para buscar cualquier categoría
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 10))
+
+        # Buscar recetas que pertenezcan a las categorías seleccionadas
+        search_data = search_recipes(query, page=page, page_size=page_size)
+
+        return render(request, "recetas/search_results.html", {
+            "query": ", ".join(selected_categories),
+            "results": search_data["results"],
+            "total_results": search_data["total_results"],
+            "page": search_data["page"],
+            "page_size": search_data["page_size"],
+            "total_pages": search_data["total_pages"],
+        })
+
+    # Obtener categorías dinámicamente desde el índice
+    categories = get_categories_from_index()
+
+    return render(request, "recetas/filter_categories.html", {"categories": categories})

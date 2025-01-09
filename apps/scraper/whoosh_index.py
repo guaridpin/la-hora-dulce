@@ -75,3 +75,16 @@ def search_recipes(query, page=1, page_size=10):
             "page_size": page_size,
             "total_pages": total_pages,
         }
+
+
+def get_categories_from_index():
+    """
+    Extrae las categorías únicas del índice Whoosh.
+    """
+    ix = get_or_create_index()
+    categories = set()
+    with ix.searcher() as searcher:
+        for doc in searcher.documents():  # Iterar sobre todos los documentos
+            if "category" in doc and doc["category"]:
+                categories.add(doc["category"])
+    return sorted(categories)
